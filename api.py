@@ -5,7 +5,8 @@ devuelve en JSON el subtipo predicho y la probabilidad de cada subtipo. El front
 solo tiene que mostrar el resultado.
 
 Ejecución:
-    pip install fastapi "uvicorn[standard]" python-multipart numpy pandas torch
+    pip install -r requirements.txt
+    pytest -q                          # pruebas de validación y predicción
     python api.py                      # arranca el servidor en http://127.0.0.1:8000
     (o: uvicorn api:app --port 8000)
     Documentación interactiva con botón para subir un CSV: http://127.0.0.1:8000/docs
@@ -14,6 +15,7 @@ Variables de entorno opcionales:
     ARTIFACTS_DIR   fuerza otra carpeta de artefactos en lugar de la búsqueda anterior
     MAX_UPLOAD_MB   tamaño máximo del CSV (por defecto 200)
     HOST, PORT      dirección del servidor al ejecutar `python api.py`
+    CORS_ORIGINS    orígenes permitidos para el front-end, separados por coma (por defecto *)
 """
 from __future__ import annotations
 
@@ -30,6 +32,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from fastapi import FastAPI, File, HTTPException, Query, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 # PyTorch solo hace falta para abrir el modelo; el resto funciona sin él.
@@ -342,11 +345,19 @@ class Artifacts:
         except Exception as exc:
             raise BackendError(f"No se pudo cargar el modelo de {NAMES.get(self.optimizer)}: {exc}") from exc
         model.eval()  # Dropout apagado y BatchNorm con sus estadísticas guardadas
-        self._model = model
+        self._model, self._n_inputs = model, n_inputs
 
     def predict(self, X):
         """X: matriz (muestras, genes). Devuelve probabilidades por subtipo."""
         self._load_model()
+        X = np.asarray(X)
+        # Última barrera antes de inferir: el tensor debe ser (muestras >= 1, genes del modelo).
+        if X.ndim != 2 or X.shape[0] < 1 or X.shape[1] != self._n_inputs:
+            raise InvalidCSV(
+                "dimension_invalida",
+                f"El tensor de entrada tiene forma {X.shape} y el modelo espera "
+                f"(n, {self._n_inputs}).",
+                tensor_shape=list(X.shape), expected_features=self._n_inputs)
         Z = ((X - self._mean) / self._scale).astype(np.float32)
         with torch.no_grad():
             return torch.softmax(self._model(torch.from_numpy(Z)), dim=1).numpy()
@@ -616,6 +627,9 @@ async def lifespan(app):
 
 app = FastAPI(title="Diagnóstico de subtipos de cáncer de mama", version="1.1.0",
               lifespan=lifespan)
+# El front-end (Capa 3) llama desde el navegador; CORS_ORIGINS="http://a,http://b" lo restringe.
+app.add_middleware(CORSMiddleware, allow_methods=["*"], allow_headers=["*"],
+                   allow_origins=os.environ.get("CORS_ORIGINS", "*").split(","))
 
 
 def fail(status, code, message, **extra):
@@ -722,6 +736,8 @@ def predict(file: UploadFile = File(...),
     optimizer, art, table, info = check_upload(optimizer, file)
     try:
         result = classify_table(art, table)
+    except InvalidCSV as exc:
+        fail(400, exc.code, exc.message, **exc.extra)
     except BackendError as exc:
         fail(503, "modelo_no_disponible", str(exc))
 
