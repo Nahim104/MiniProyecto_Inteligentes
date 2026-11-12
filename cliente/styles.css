@@ -1,0 +1,169 @@
+:root {
+    --bg: #f6f8fb;
+    --surface: #fff;
+    --text: #34425a;
+    --muted: #7a8699;
+    --border: #dbe1ea;
+    --accent: #4a6fa5;
+    --accent-dark: #3b5b8a;
+    --highlight: #eaf0f9;
+    --error: #b00020;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: sans-serif;
+}
+
+input,
+button {
+    font: inherit;
+}
+
+.container {
+    width: min(640px, 92%);
+    margin: 0 auto;
+}
+
+.header {
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+    font-weight: bold;
+}
+
+.intro {
+    padding: 40px 0 25px;
+    text-align: center;
+}
+
+.intro h1 {
+    margin: 0 0 10px;
+    font-size: 1.8rem;
+}
+
+.intro p {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+.card {
+    padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+}
+
+#upload-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#upload-form input,
+button {
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+}
+
+#upload-form input {
+    background: var(--bg);
+}
+
+button {
+    color: var(--surface);
+    background: var(--accent);
+    border-color: var(--accent);
+    cursor: pointer; /* Para mostrar el cursor de la mano */
+}
+
+button:hover:not(:disabled) {
+    background: var(--accent-dark);
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#message {
+    margin: 15px 0 0;
+    font-size: 0.9rem;
+}
+
+#message.error {
+    color: var(--error);
+}
+
+#results {
+    margin-top: 40px;
+}
+
+.results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.results-header h2 {
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+#results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.card h2 {
+    margin: 0 0 5px;
+    font-size: 1rem;
+}
+
+.card p {
+    margin: 5px 0;
+}
+
+.etiqueta {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.card-info {
+    margin: 15px 0 0;
+    padding: 10px 0 0;
+    border-top: 1px solid var(--border);
+    list-style: none;
+}
+
+.card-info li {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 10px;
+    border-radius: 4px;
+}
+
+.card-info li.top {
+    background: var(--highlight);
+    color: var(--accent-dark);
+    font-weight: bold;
+}
+
+.footer {
+    margin-top: 50px;
+    padding: 20px 0;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.8rem;
+    text-align: center;
+}

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Clasificador de cáncer de mama</title>
+        <link rel="stylesheet" href="styles.css" />
+        <script src="app.js" defer></script>
+    </head>
+    <body>
+        <main class="container">
+            <header class="header">Clasificador de cáncer de mama</header>
+
+            <section class="intro">
+                <h1>Analiza tu archivo CSV</h1>
+                <p>
+                    Sube un CSV de expresión genética y obtén la probabilidad de
+                    cada subtipo de cáncer de mama.
+                </p>
+            </section>
+
+            <section class="card">
+                <form id="upload-form">
+                    <input type="file" id="csv-file" accept=".csv,text/csv" />
+                    <button type="submit" id="submit-button" disabled>
+                        Procesar archivo
+                    </button>
+                </form>
+                <p id="message" role="status" hidden></p>
+            </section>
+
+            <section id="results" hidden>
+                <div class="results-header">
+                    <h2>Resultados</h2>
+                    <button type="button" id="download-button">
+                        Descargar CSV
+                    </button>
+                </div>
+                <div id="results-list"></div>
+            </section>
+
+            <footer class="footer">
+                Clasificador de cáncer de mama | 1905 Sistemas Inteligentes
+                2026Q4
+            </footer>
+        </main>
+    </body>
+</html>

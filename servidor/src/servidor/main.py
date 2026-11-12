@@ -6,6 +6,7 @@ import io
 import numpy as np
 import pandas as pd
 from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 
 from servidor.model import CancerClassifier
 
@@ -31,6 +32,12 @@ app = FastAPI(
     title="Clasificación de subtipos de cáncer de mama",
     version="2.0.0",
     lifespan=lifespan
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # TODO: en prod, poner el origen del FE
+    allow_methods=["POST"],
 )
 
 
