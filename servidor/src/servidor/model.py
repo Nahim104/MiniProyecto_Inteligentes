@@ -6,6 +6,38 @@ import torch
 from torch import nn
 
 
+MODEL = "modelo.pth"
+
+#Buscamos en artifacts el archivo modelo.pth y si no esta, lanzamos un error
+def validar_modelo(artifacts_dir: Path) -> Path:
+    if not artifacts_dir.is_dir():
+        raise FileNotFoundError(
+            f"No existe la carpeta de artefactos: {artifacts_dir}"
+        )
+
+    # Nombres reales en disco, respetando mayúsculas/minúsculas
+    nombres = {p.name for p in artifacts_dir.iterdir() if p.is_file()}
+
+    #Busca el nombre de otros archivos .pth para comprobar si hay un error de nombre
+    if MODEL not in nombres:
+        otros_pth = sorted(n for n in nombres if n.lower().endswith(".pth"))
+
+        if otros_pth:
+            raise FileNotFoundError(
+                f"No se encontró '{MODEL}' en {artifacts_dir}. "
+                f"Hay archivos .pth con otro nombre: {otros_pth}. "
+                f"Renómbralo exactamente a '{MODEL}'."
+            )
+
+        #No existe para nada un archivo .pth 
+        else:
+         raise FileNotFoundError(
+            f"No se encontró '{MODEL}' en {artifacts_dir}."
+        )
+
+    return artifacts_dir / MODEL
+
+
 class CancerSubtypeNet(nn.Module):
     """Arquitectura utilizada durante el entrenamiento en Colab."""
 
@@ -30,6 +62,8 @@ class CancerClassifier:
 
     def __init__(self, artifacts_dir: Path):
         self.artifacts_dir = artifacts_dir
+
+        model_path = validar_modelo(artifacts_dir)
 
         # 1. Cargar metadata
         with open(artifacts_dir / "metadata.json", encoding="utf-8") as f:
@@ -71,6 +105,7 @@ class CancerClassifier:
         if (self.scale <= 0).any():
             raise ValueError("El scaler contiene escalas inválidas.")
 
+       
     def predict(self, X: np.ndarray):
         """Recibe una matriz de expresiones genéticas y devuelve probabilidades."""
 
